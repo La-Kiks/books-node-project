@@ -5,6 +5,7 @@ const auth = require("../middlewares/auth");
 const multer = require("../middlewares/multer");
 
 router.get("/", bookController.getAllBooks);
+router.get("/bestrating", bookController.getBestRatedBooks);
 router.get("/:id", bookController.getOneBook);
 router.post("/", auth, multer, bookController.addBook);
 router.put("/:id", auth, multer, bookController.updateBook);
