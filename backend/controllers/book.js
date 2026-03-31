@@ -46,6 +46,10 @@ exports.addBook = async (req, res) => {
 
 exports.updateBook = async (req, res) => {
   try {
+    if (book.userId !== req.auth.userId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
     const bookData = req.file ? JSON.parse(req.body.book) : req.body;
 
     const updatedData = {

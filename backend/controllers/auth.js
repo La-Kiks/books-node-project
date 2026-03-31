@@ -4,14 +4,34 @@ const User = require("../models/user");
 
 exports.signup = async (req, res) => {
   try {
-    const hash = await bcrypt.hash(req.body.password, 10);
-    const user = new User({
-      email: req.body.email,
-      password: hash,
-    });
+    const { email, password } = req.body;
+
+    if (!password || password.length < 8) {
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 8 characters" });
+    }
+    if (/\s/.test(password)) {
+      return res
+        .status(400)
+        .json({ error: "Password must not contain spaces" });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+    const user = new User({ email, password: hash });
+
     await user.save();
     res.status(201).json({ message: "User created successfully" });
   } catch (err) {
+    if (err.name === "ValidationError") {
+      const messages = Object.values(err.errors).map((e) => e.message);
+      return res.status(400).json({ error: messages[0] });
+    }
+
+    if (err.code === 11000) {
+      return res.status(400).json({ error: "Email already in use" });
+    }
+
     res.status(400).json({ error: err.message });
   }
 };
